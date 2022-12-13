@@ -1,9 +1,5 @@
 from pyteal import *
 
-# issues:
-# discountamount isn't prperly checked to be below amount
-# 
-
 
 class Wear:
     class AppMethods:
