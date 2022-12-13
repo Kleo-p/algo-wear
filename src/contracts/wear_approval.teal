@@ -1,0 +1,155 @@
+#pragma version 6
+txn ApplicationID
+int 0
+==
+bnz main_l10
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l9
+txna ApplicationArgs 0
+byte "buy"
+==
+bnz main_l8
+txna ApplicationArgs 0
+byte "change_discount"
+==
+bnz main_l7
+txna ApplicationArgs 0
+byte "update-stock"
+==
+bnz main_l6
+err
+main_l6:
+global GroupSize
+int 1
+==
+txn NumAppArgs
+int 2
+==
+&&
+txna ApplicationArgs 1
+btoi
+int 0
+>
+&&
+txn Sender
+byte "_creator"
+app_global_get
+==
+&&
+assert
+byte "_stock"
+txna ApplicationArgs 1
+btoi
+app_global_put
+int 1
+return
+main_l7:
+global GroupSize
+int 1
+==
+txn NumAppArgs
+int 2
+==
+&&
+txn Sender
+byte "_creator"
+app_global_get
+==
+&&
+assert
+byte "_discount"
+txna ApplicationArgs 1
+btoi
+app_global_put
+int 1
+return
+main_l8:
+global GroupSize
+int 2
+==
+txn NumAppArgs
+int 1
+==
+&&
+byte "_stock"
+app_global_get
+int 0
+>
+&&
+gtxn 1 TypeEnum
+int pay
+==
+&&
+gtxn 1 Receiver
+byte "_creator"
+app_global_get
+==
+&&
+gtxn 1 Amount
+byte "_amount"
+app_global_get
+byte "_discount"
+app_global_get
+-
+==
+&&
+gtxn 1 Sender
+gtxn 0 Sender
+==
+&&
+assert
+byte "_stock"
+byte "_stock"
+app_global_get
+int 1
+-
+app_global_put
+int 1
+return
+main_l9:
+txn Sender
+global CreatorAddress
+==
+return
+main_l10:
+txn NumAppArgs
+int 6
+==
+assert
+txn Note
+byte "wear:uv3"
+==
+assert
+txna ApplicationArgs 3
+btoi
+int 0
+>
+assert
+byte "_creator"
+txn Sender
+app_global_put
+byte "_name"
+txna ApplicationArgs 0
+app_global_put
+byte "_description"
+txna ApplicationArgs 1
+app_global_put
+byte "_image"
+txna ApplicationArgs 2
+app_global_put
+byte "_amount"
+txna ApplicationArgs 3
+btoi
+app_global_put
+byte "_stock"
+txna ApplicationArgs 4
+btoi
+app_global_put
+byte "_discount"
+txna ApplicationArgs 5
+btoi
+app_global_put
+int 1
+return
