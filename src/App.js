@@ -6,7 +6,7 @@ import {Container, Nav} from "react-bootstrap";
 import Wears from "./components/marketplace/Wears";
 import {indexerClient, myAlgoConnect} from "./utils/constants";
 import {Notification} from "./components/utils/Notifications";
-import coverImg from "./assets/img/sandwich.jpg"
+import coverImg from "./assets/img/cover.avif"
 
 const App = function AppWrapper() {
 
