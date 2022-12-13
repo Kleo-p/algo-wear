@@ -28,14 +28,8 @@ txn NumAppArgs
 int 2
 ==
 &&
-txna ApplicationArgs 1
-btoi
-int 0
->
-&&
 txn Sender
-byte "_creator"
-app_global_get
+global CreatorAddress
 ==
 &&
 assert
@@ -54,9 +48,14 @@ int 2
 ==
 &&
 txn Sender
-byte "_creator"
-app_global_get
+global CreatorAddress
 ==
+&&
+txna ApplicationArgs 1
+btoi
+byte "_amount"
+app_global_get
+<=
 &&
 assert
 byte "_discount"
@@ -83,8 +82,7 @@ int pay
 ==
 &&
 gtxn 1 Receiver
-byte "_creator"
-app_global_get
+global CreatorAddress
 ==
 &&
 gtxn 1 Amount
@@ -126,10 +124,28 @@ txna ApplicationArgs 3
 btoi
 int 0
 >
+txna ApplicationArgs 0
+len
+int 0
+>
+&&
+txna ApplicationArgs 1
+len
+int 0
+>
+&&
+txna ApplicationArgs 2
+len
+int 0
+>
+&&
+txna ApplicationArgs 5
+btoi
+txna ApplicationArgs 3
+btoi
+<=
+&&
 assert
-byte "_creator"
-txn Sender
-app_global_put
 byte "_name"
 txna ApplicationArgs 0
 app_global_put
