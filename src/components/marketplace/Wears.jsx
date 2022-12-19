@@ -64,6 +64,11 @@ const Wears = ({address, fetchBalance}) => {
 
     const changeDiscount = async (wear, discount) => {
         setLoading(true);
+        if(wear.amount < discount){
+            toast(<NotificationError text="Discount amount needs to be less than the price."/>);
+            setLoading(false)
+            return;
+        }
         changeDiscountAction(address, wear, discount)
             .then(() => {
                 toast(<NotificationSuccess text="Discount changed successfully"/>);

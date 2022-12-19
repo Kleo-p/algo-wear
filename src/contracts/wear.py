@@ -8,7 +8,6 @@ class Wear:
         update_stock = Bytes("update-stock")
 
     class Variables:
-        creator = Bytes("_creator")
         name = Bytes("_name")
         description = Bytes("_description")
         amount = Bytes("_amount")
@@ -22,11 +21,18 @@ class Wear:
             Assert(Txn.application_args.length() == Int(6)),
             # check contract note
             Assert(Txn.note() == Bytes("wear:uv3")),
-            # check that price is greater than 0
-            Assert(Btoi(Txn.application_args[3]) > Int(0)),
+            Assert(
+                And(
+                    # check that price is greater than 0
+                    Btoi(Txn.application_args[3]) > Int(0),
+                    Len(Txn.application_args[0]) > Int(0),
+                    Len(Txn.application_args[1]) > Int(0),
+                    Len(Txn.application_args[2]) > Int(0),
+                    Btoi(Txn.application_args[5]) <= Btoi(Txn.application_args[3])
+                ),
+            ),
 
-            # intialize variables
-            App.globalPut(self.Variables.creator, Txn.sender()),
+            # intialize variables,
             App.globalPut(self.Variables.name, Txn.application_args[0]),
             App.globalPut(self.Variables.description, Txn.application_args[1]),
             App.globalPut(self.Variables.image, Txn.application_args[2]),
@@ -51,15 +57,10 @@ class Wear:
                     Global.group_size() == Int(2),
                     # check if the arguments passed is 1
                     Txn.application_args.length() == Int(1),
-                    # check that sender is not the creator
-                    # Txn.sender() != App.globalGet(self.Variables.creator),
                     # check that stock is not 0
                     App.globalGet(self.Variables.stock) > Int(0),
-
-
                     Gtxn[1].type_enum() == TxnType.Payment,
-                    Gtxn[1].receiver() == App.globalGet(
-                        self.Variables.creator),
+                    Gtxn[1].receiver() == Global.creator_address(),
                     Gtxn[1].amount() == discounted_amount,
                     Gtxn[1].sender() == Gtxn[0].sender(),
                 )
@@ -78,7 +79,9 @@ class Wear:
                     # check if the arguments passed is 2
                     Txn.application_args.length() == Int(2),
                     # check if the sender is the creator
-                    Txn.sender() == App.globalGet(self.Variables.creator),
+                    Txn.sender() == Global.creator_address(),
+                    # ensures discounted amount isn't over the price of the product to prevent issues
+                    Btoi(Txn.application_args[1]) <= App.globalGet(self.Variables.amount)
 
                 ),
             ),
@@ -94,10 +97,8 @@ class Wear:
                     Global.group_size() == Int(1),
                     # check if the arguments passed is 2
                     Txn.application_args.length() == Int(2),
-                    # make sure that arg passed is greater than 0
-                    Btoi(Txn.application_args[1]) > Int(0),
                     # check if the sender is the creator
-                    Txn.sender() == App.globalGet(self.Variables.creator),
+                    Txn.sender() == Global.creator_address(),
 
                 ),
             ),

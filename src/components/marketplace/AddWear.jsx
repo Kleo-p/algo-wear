@@ -12,7 +12,7 @@ const AddWear = ({createWear}) => {
     const [discount, setDiscount] = useState(0);
 
     const isFormFilled = useCallback(() => {
-        return name && image && description && price > 0
+        return name && image && description && price > 0 && discount < price
     }, [name, image, description, price]);
 
     const [show, setShow] = useState(false);
@@ -84,7 +84,7 @@ const AddWear = ({createWear}) => {
                         >
                             <Form.Control
                                 type="text"
-                                placeholder="Discount"
+                                placeholder="Discount amount in ALGO"
                                 onChange={(e) => {
                                     setDiscount(stringToMicroAlgos(e.target.value));
                                 }}

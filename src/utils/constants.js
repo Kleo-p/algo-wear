@@ -26,6 +26,6 @@ export const numLocalInts = 0;
 export const numLocalBytes = 0;
 // Maximum global storage allocation, immutable
 export const numGlobalInts = 3; // Global variables stored as Int: count, sold
-export const numGlobalBytes = 4; // Global variables stored as Bytes: name, description, image
+export const numGlobalBytes = 3; // Global variables stored as Bytes: name, description, image
 
 export const ALGORAND_DECIMALS = 6;
