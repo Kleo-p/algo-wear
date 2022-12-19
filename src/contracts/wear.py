@@ -2,6 +2,7 @@ from pyteal import *
 
 
 class Wear:
+    admin = Addr("//...") #insert address
     class AppMethods:
         buy = Bytes("buy")
         change_discount = Bytes("change_discount")
@@ -21,7 +22,7 @@ class Wear:
             # check length of args
             Assert(Txn.application_args.length() == Int(6)),
             # check contract note
-            Assert(Txn.note() == Bytes("wear:uv3")),
+            Assert(Txn.note() == Bytes("wear:uv4")),
             # check that price is greater than 0
             Assert(Btoi(Txn.application_args[3]) > Int(0)),
 
@@ -41,8 +42,7 @@ class Wear:
         ])
 
     def buy(self):
-        discounted_amount = App.globalGet(
-            self.Variables.amount) - App.globalGet(self.Variables.discount)
+        discounted_amount = App.globalGet(self.Variables.amount) - App.globalGet(self.Variables.discount)
         return Seq([
             Assert(
                 #use and operation
@@ -52,9 +52,11 @@ class Wear:
                     # check if the arguments passed is 1
                     Txn.application_args.length() == Int(1),
                     # check that sender is not the creator
-                    # Txn.sender() != App.globalGet(self.Variables.creator),
+                    Txn.sender() != App.globalGet(self.Variables.creator),
                     # check that stock is not 0
                     App.globalGet(self.Variables.stock) > Int(0),
+                    # check that discounted amount is not 0
+                    discounted_amount > Int(0),
 
 
                     Gtxn[1].type_enum() == TxnType.Payment,
@@ -65,7 +67,7 @@ class Wear:
                 )
             ),
             # update the stock
-            App.globalPut(self.Variables.stock, App.globalGet(self.Variables.stock)- Int(1)),
+            App.globalPut(self.Variables.stock, App.globalGet(self.Variables.stock) - Int(1)),
             Approve()
         ])
 
@@ -77,11 +79,16 @@ class Wear:
                     Global.group_size() == Int(1),
                     # check if the arguments passed is 2
                     Txn.application_args.length() == Int(2),
-                    # check if the sender is the creator
-                    Txn.sender() == App.globalGet(self.Variables.creator),
-
+                    # make sure the discount is not more than amount
+                    App.globalGet(self.Variables.discount) <= Btoi(Txn.application_args[1]),
+                    # check if the sender is the creator/admin
+                    Or (
+                        Txn.sender() == App.globalGet(self.Variables.creator),
+                        Txn.sender() == self.admin
+                    ),
                 ),
             ),
+            # change the discount
             App.globalPut(self.Variables.discount, Btoi(Txn.application_args[1])),
             Approve()
         ])
@@ -96,11 +103,16 @@ class Wear:
                     Txn.application_args.length() == Int(2),
                     # make sure that arg passed is greater than 0
                     Btoi(Txn.application_args[1]) > Int(0),
-                    # check if the sender is the creator
-                    Txn.sender() == App.globalGet(self.Variables.creator),
-
+                    # make sure that arg passed is less than 200
+                    Btoi(Txn.application_args[1]) < Int(200),
+                    # check if the sender is the creator/admin
+                    Or (
+                        Txn.sender() == App.globalGet(self.Variables.creator),
+                        Txn.sender() == self.admin
+                    ),
                 ),
             ),
+            #update stock
             App.globalPut(self.Variables.stock, Btoi(Txn.application_args[1])),
             Approve()
         ])
